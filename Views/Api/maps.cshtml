@@ -83,13 +83,13 @@
             var markerNombre = 5
             var arrowUp = document.querySelector("div.arrow-up");
             var arrowDown = document.querySelector("div.arrow-down");
-            lat = elements[i].querySelector("div.lat");
-            lng = elements[i].querySelector("div.lng");
-            address = elements[i].querySelector("div.address");
-            available_bikes = elements[i].querySelector("div.available_bikes");
+
 
             for (var i = 0; i < elements.length; i++) {
-
+                lat = elements[i].querySelector("div.lat");
+                lng = elements[i].querySelector("div.lng");
+                address = elements[i].querySelector("div.address");
+                available_bikes = elements[i].querySelector("div.available_bikes");
 
                 markerSize = Math.sqrt((lat.innerHTML - position.coords.latitude) * (lat.innerHTML - position.coords.latitude) + (lng.innerHTML - position.coords.longitude) * (lng.innerHTML - position.coords.longitude))
                 markerValue.push(address.innerHTML, available_bikes.innerHTML, markerSize, lat.innerHTML, lng.innerHTML);
@@ -123,14 +123,20 @@
             }
 
             arrowUp.onclick = function () {
+                map.removeLayer(L)
                 markerNombre++;
                 createMarker(markerNombre)
             };
+
+            //augmenter nombre de marker
             
             arrowDown.onclick = function () {
+                map.removeLayer(L)
                 markerNombre = markerNombre - 1;
                 createMarker(markerNombre)
             };
+
+            //diminuer nombre de marker
 
         })
 
