@@ -16,6 +16,26 @@
         #mapid {
             height: 600px;
         }
+
+        .arrow-up {
+            width: 0;
+            height: 0;
+    
+            border-right: 16px solid transparent;
+            border-left: 16px solid transparent;
+    
+            border-bottom: 20px solid #8888e8;
+        }
+
+        .arrow-down {
+            width: 0;
+            height: 0;
+    
+            border-right: 16px solid transparent;
+            border-left: 16px solid transparent;
+    
+            border-top: 20px solid #f7df6c;
+        }
     </style>
 </head>
 
@@ -23,6 +43,9 @@
     <h1>@ViewData["Title"]</h1>
 
     <div id="mapid"></div>
+
+    <div class="arrow-up"></div>
+    <div class="arrow-down"></div>
 
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
             integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
@@ -33,50 +56,88 @@
 
     @foreach (var item in Model)
     {
-<div style="display: none;" class="geolocalisation">
-    <div class="lat">@item.lat</div>
-    <div class="lng">@item.lng</div>
-    <div class="address">@item.address</div>
-    <div class="available_bikes">@item.available_bikes</div>
-</div>
+        <div style="display: none;" class="geolocalisation">
+            <div class="lat">@item.lat</div>
+            <div class="lng">@item.lng</div>
+            <div class="address">@item.address</div>
+            <div class="available_bikes">@item.available_bikes</div>
+        </div>
     }
 
     <script>
         elements = document.querySelectorAll("div.geolocalisation");
 
         var watchID = navigator.geolocation.watchPosition(function (position) {
- 
+
+            var map = L.map('mapid').setView([position.coords.latitude, position.coords.longitude], 33);
+            L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+                attribution: 'données © <a href="//osm.org/copyright">OpenStreetMap</a>/ODbL - rendu <a href="//openstreetmap.fr">OSM France</a>',
+                minZoom: 10,
+                maxZoom: 15
+            }).addTo(map);
 
 
-        var map = L.map('mapid').setView([position.coords.latitude, position.coords.longitude], 33);
-        L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
-            attribution: 'données © <a href="//osm.org/copyright">OpenStreetMap</a>/ODbL - rendu <a href="//openstreetmap.fr">OSM France</a>',
-            minZoom: 10,
-            maxZoom: 15
-        }).addTo(map);
-
-        var marker = L.marker([45.76, 4.88]).addTo(map);
-
-
-        for (var i = 0; i < elements.length; i++) {
+            var markerTab = new Array();
+            var markerSize = new Array();
+            var markerValue = new Array();
+            var markerNombre = 5
+            var arrowUp = document.querySelector("div.arrow-up");
+            var arrowDown = document.querySelector("div.arrow-down");
             lat = elements[i].querySelector("div.lat");
             lng = elements[i].querySelector("div.lng");
             address = elements[i].querySelector("div.address");
             available_bikes = elements[i].querySelector("div.available_bikes");
 
-            marker = L.marker([lat.innerHTML, lng.innerHTML]).addTo(map);
-            marker.bindPopup(
-                "<p> adresse : " + address.innerHTML + "</p>" +
-                "<p> places de vélos disponible : " + available_bikes.innerHTML + "</p>"
-            )
+            for (var i = 0; i < elements.length; i++) {
+
+
+                markerSize = Math.sqrt((lat.innerHTML - position.coords.latitude) * (lat.innerHTML - position.coords.latitude) + (lng.innerHTML - position.coords.longitude) * (lng.innerHTML - position.coords.longitude))
+                markerValue.push(address.innerHTML, available_bikes.innerHTML, markerSize, lat.innerHTML, lng.innerHTML);
+
+                markerTab.push(markerValue);
+                markerValue = []
+
             }
+
+            markerTab.sort(function (a, b) {
+                if (a[2] < b[2]) {
+                    return -1
+                }
+                if (b[2] < a[2]) {
+                    return 1
+                }
+                return 0
+            });
+
+            createMarker(markerNombre)
+
+            function createMarker(nombreMarker) {
+                for (var i = 0; i < nombreMarker; i++) {
+
+                    marker = L.marker([markerTab[i][3], markerTab[i][4]]).addTo(map);
+                    marker.bindPopup(
+                        "<p> adresse : " + markerTab[i][0] + "</p>" +
+                        "<p> places de vélos disponible : " + markerTab[i][1] + "</p>"
+                    )
+                }
+            }
+
+            arrowUp.onclick = function () {
+                markerNombre++;
+                createMarker(markerNombre)
+            };
+            
+            arrowDown.onclick = function () {
+                markerNombre = markerNombre - 1;
+                createMarker(markerNombre)
+            };
 
         })
 
- 
 
 
-        
+
+
 
     </script>
 </body>
