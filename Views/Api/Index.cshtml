@@ -1,7 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-
 @foreach (var item in Model)
 {
     <p>@item.pole</p>
@@ -12,8 +11,4 @@
 
 }
 
-<script>
-    navigator.geolocation.getCurrentPosition(position => {
-  console.log(position)
-})
-</script>
+
